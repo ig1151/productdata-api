@@ -19,3 +19,17 @@ async function scrape(url) {
       console.warn('Shopify scrape failed, falling back to generic:', err.message);
     }
   }
+
+  // Fallback to generic scraper
+  const data = await scrapeGeneric(url);
+
+  if (!data || !data.title) {
+    const error = new Error('Could not extract product data');
+    error.code = 'PARSE_FAILURE';
+    throw error;
+  }
+
+  return data;
+}
+
+module.exports = { scrape };
