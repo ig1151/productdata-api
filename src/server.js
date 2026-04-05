@@ -13,7 +13,7 @@ const app = express();
 app.use(helmet());
 app.use(express.json({ limit: '1mb' }));
 
-// ✅ NEW ROOT ROUTE (homepage)
+// ✅ ROOT ROUTE (homepage)
 app.get('/', (req, res) => {
   res.json({
     ok: true,
@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       docs: '/docs',
+      openapi: '/openapi.json',
       health: '/v1/health',
       extract_sync: '/v1/extract',
       extract_async: '/v1/extract/async'
@@ -28,7 +29,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check
+// ✅ HEALTH CHECK
 app.get('/v1/health', async (req, res) => {
   const cacheOk = await pingCache();
   res.json({
@@ -38,10 +39,15 @@ app.get('/v1/health', async (req, res) => {
   });
 });
 
-// Swagger docs
+// ✅ SWAGGER UI
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 
-// Rate limiting
+// ✅ OPENAPI SPEC (for Orbis / marketplaces)
+app.get('/openapi.json', (req, res) => {
+  res.json(swaggerDoc);
+});
+
+// ✅ RATE LIMITING
 const limiter = rateLimit({
   windowMs: 60_000,
   max: parseInt(process.env.RATE_LIMIT_RPM || '60', 10),
@@ -54,12 +60,12 @@ const limiter = rateLimit({
   }
 });
 
-// Protected routes
+// ✅ PROTECTED ROUTES
 app.use('/v1/', authenticate, limiter);
 app.use('/v1/extract', require('./routes/extract'));
 app.use('/v1/jobs', require('./routes/jobs'));
 
-// Error handler
+// ✅ ERROR HANDLER
 app.use((err, req, res, next) => {
   console.error(err);
 
