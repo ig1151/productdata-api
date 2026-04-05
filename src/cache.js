@@ -60,4 +60,10 @@ async function setCache(url, data) {
   } catch {}
 }
 
-module.exports = { getCache, setCache, pingCache, normalizeUrl };
+module.exports = {
+  getCache,
+  setCache,
+  pingCache,
+  normalizeUrl,
+  getRedisClient: getClient
+};
