@@ -1,31 +1,32 @@
-const axios = require('axios');
+const { scrapeShopify } = require('./shopify');
+const { scrapeGeneric } = require('./generic');
+const { isShopify } = require('./detect');
 
-async function scrapeShopify(url) {
-  const parsed = new URL(url);
-  const base = parsed.protocol + '//' + parsed.hostname;
-  const handle = parsed.pathname.replace('/products/', '').split('?')[0];
+async function scrape(url) {
+  const { hostname } = new URL(url);
+  const shopify = await isShopify(hostname);
 
-  const { data } = await axios.get(
-    base + '/products/' + handle + '.json',
-    {
-      timeout: 10000,
-      headers: { 'User-Agent': 'ProductDataBot/1.0' }
+  if (shopify) {
+    try {
+      const data = await scrapeShopify(url);
+
+      if (data && data.title) {
+        return data;
+      }
+    } catch (err) {
+      console.warn('Shopify scrape failed, falling back to generic:', err.message);
     }
-  );
+  }
 
-  const p = data.product;
-  const v = p?.variants?.[0] || {};
+  const data = await scrapeGeneric(url);
 
-  return {
-    title: p?.title || null,
-    price: v?.price ? parseFloat(v.price) : null,
-    currency: null,
-    availability: v?.available ? 'in_stock' : 'out_of_stock',
-    images: (p?.images || []).map(i => i.src).filter(Boolean),
-    brand: p?.vendor || null,
-    sku: v?.sku || null,
-    source: 'shopify_api'
-  };
+  if (!data || !data.title) {
+    const error = new Error('Could not extract product data');
+    error.code = 'PARSE_FAILURE';
+    throw error;
+  }
+
+  return data;
 }
 
-module.exports = { scrapeShopify };
+module.exports = { scrape };
