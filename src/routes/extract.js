@@ -28,14 +28,20 @@ router.post('/', async (req, res, next) => {
     if (!force_refresh) {
       const hit = await getCache(url);
       if (hit) {
-        return res.json({ ...hit, _meta: { cached: true } });
+        return res.json({
+          ...hit,
+          _meta: { cached: true }
+        });
       }
     }
 
     const result = await scrape(url);
     await setCache(url, result);
 
-    res.json({ ...result, _meta: { cached: false } });
+    res.json({
+      ...result,
+      _meta: { cached: false }
+    });
   } catch (e) {
     next(e);
   }
@@ -52,7 +58,10 @@ router.post('/async', async (req, res, next) => {
       });
     }
 
-    const job = await addJob({ url, apiKey: req.apiKey });
+    const job = await addJob({
+      url,
+      apiKey: req.apiKey
+    });
 
     res.status(202).json({
       job_id: job.id,
