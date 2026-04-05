@@ -4,10 +4,8 @@ const { isShopify } = require('./detect');
 
 async function scrape(url) {
   const { hostname } = new URL(url);
-
   const shopify = await isShopify(hostname);
 
-  // Try Shopify first
   if (shopify) {
     try {
       const data = await scrapeShopify(url);
@@ -20,7 +18,6 @@ async function scrape(url) {
     }
   }
 
-  // Fallback to generic scraper
   const data = await scrapeGeneric(url);
 
   if (!data || !data.title) {
