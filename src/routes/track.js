@@ -91,7 +91,7 @@ router.get('/:id/history', async (req, res, next) => {
     const redis = getRedisClient();
     const { id } = req.params;
 
-    const list = await redis.lrange(historyKey(id), 0, -1);
+    const list = await redis.lRange(historyKey(id), 0, -1);
 
     res.json({
       track_id: id,
@@ -127,7 +127,7 @@ router.post('/:id/refresh', async (req, res, next) => {
     };
 
     await redis.set(latestKey(id), JSON.stringify(snapshot));
-    await redis.lpush(historyKey(id), JSON.stringify(snapshot));
+    await redis.lPush(historyKey(id), JSON.stringify(snapshot));
 
     res.json({
       track_id: id,
