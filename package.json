@@ -18,7 +18,8 @@
     "helmet": "^7.0.0",
     "redis": "^4.6.0",
     "swagger-ui-express": "^5.0.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "resend": "^4.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
