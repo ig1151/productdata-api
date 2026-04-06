@@ -65,6 +65,7 @@ app.use('/v1/', authenticate, limiter);
 app.use('/v1/extract', require('./routes/extract'));
 app.use('/v1/jobs', require('./routes/jobs'));
 app.use('/v1/track', require('./routes/track'));
+app.use('/v1/alerts', require('./routes/alerts'));
 
 // ✅ ERROR HANDLER
 app.use((err, req, res, next) => {
