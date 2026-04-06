@@ -2,6 +2,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { scrape } = require('../scraper');
 const { getRedisClient } = require('../cache');
+const { evaluateAlerts } = require('../alerts');
 
 const router = express.Router();
 
@@ -118,7 +119,6 @@ router.post('/:id/refresh', async (req, res, next) => {
     }
 
     const tracker = JSON.parse(data);
-
     const result = await scrape(tracker.url);
 
     const snapshot = {
@@ -129,10 +129,13 @@ router.post('/:id/refresh', async (req, res, next) => {
     await redis.set(latestKey(id), JSON.stringify(snapshot));
     await redis.lPush(historyKey(id), JSON.stringify(snapshot));
 
+    const triggered_alerts = await evaluateAlerts(id, snapshot);
+
     res.json({
       track_id: id,
       status: 'updated',
-      snapshot
+      snapshot,
+      triggered_alerts
     });
   } catch (e) {
     next(e);
