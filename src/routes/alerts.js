@@ -19,7 +19,13 @@ function validType(type) {
 // CREATE ALERT
 router.post('/', async (req, res, next) => {
   try {
-    const { track_id, type, value = null } = req.body || {};
+    const {
+      track_id,
+      type,
+      value = null,
+      webhook_url = null,
+      email_to = null
+    } = req.body || {};
 
     if (!track_id) {
       return res.status(400).json({
@@ -35,7 +41,10 @@ router.post('/', async (req, res, next) => {
       });
     }
 
-    if ((type === 'price_below' || type === 'price_above') && (value === null || value === undefined || isNaN(Number(value)))) {
+    if (
+      (type === 'price_below' || type === 'price_above') &&
+      (value === null || value === undefined || isNaN(Number(value)))
+    ) {
       return res.status(400).json({
         error: 'validation_error',
         message: 'Numeric value is required for price alerts.'
@@ -50,6 +59,8 @@ router.post('/', async (req, res, next) => {
       track_id,
       type,
       value: value !== null ? Number(value) : null,
+      webhook_url,
+      email_to,
       status: 'active',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
